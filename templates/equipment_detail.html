@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-3 mb-2">
+  <a href="{{ url_for('equipment.list') }}"
+     class="btn btn-light rounded-circle border d-inline-flex align-items-center justify-content-center p-0"
+     style="width:38px;height:38px"
+     onclick="return goBackFallback(this.href)"
+     title="Back">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+
+  <h4 class="mb-0">{{ eq.name }}</h4>
+  <div class="ms-auto small text-muted">
+    Last Update: {{ eq.updated_at.strftime("%d/%m/%Y, %H:%M") }}{% if eq.created_by %} &nbsp;|&nbsp; By: {{ eq.created_by }}{% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  {% for view in VIEWS %}
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <div class="fw-semibold mb-2">{{ view_labels[view] }}</div>
+
+        <!-- Preview proporsional -->
+        <div class="border rounded overflow-hidden mb-3 bg-light d-flex align-items-center justify-content-center"
+             style="height:300px;">
+          {% if images.get(view) %}
+            <img src="{{ images[view] }}" alt="{{ view }}" class="w-100 h-100" style="object-fit:contain;">
+          {% else %}
+            <div class="text-muted">No Image</div>
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data"
+              action="{{ url_for('equipment.upload_view', equipment_id=eq.id, view=view) }}"
+              class="mt-auto">
+          <input class="form-control mb-2" type="file" name="image"
+                 accept=".png,.jpg,.jpeg,.webp,.gif" required>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary">
+              {{ 'Change Image' if images.get(view) else 'Upload Image' }}
+            </button>
+
+            {% if images.get(view) %}
+              <button formaction="{{ url_for('equipment.remove_view', equipment_id=eq.id, view=view) }}"
+                      class="btn btn-outline-danger">Remove</button>
+
+              <button type="button"
+                      class="btn btn-outline-secondary btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#imgViewerModal"
+                      data-viewer-url="{{ images[view] }}"
+                      data-viewer-caption="{{ view_labels[view] }}">
+                <i class="bi bi-box-arrow-up-right"></i> Open
+              </button>
+            {% endif %}
+          </div>
+          <div class="form-text">PNG/JPG/WebP/GIF, maks 1 MB.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- MODAL viewer -->
+<div class="modal fade" id="imgViewerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-dark text-white border-0">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="viewerTitle"></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body d-flex align-items-center justify-content-center">
+        <img id="viewerImg" alt="" class="w-100 h-100" style="object-fit:contain;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Isi modal dari data-atribut tombol
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-viewer-url]');
+    if (!btn) return;
+    const url = btn.getAttribute('data-viewer-url');
+    const cap = btn.getAttribute('data-viewer-caption') || '';
+    const img = document.getElementById('viewerImg');
+    const title = document.getElementById('viewerTitle');
+    img.src = url;
+    img.alt = cap;
+    title.textContent = cap;
+  });
+</script>
+
+{% endblock %}

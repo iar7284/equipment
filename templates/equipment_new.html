@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="mb-3">
+  <h4 class="mb-2">Add New Equipment</h4>
+
+  <form method="post" action="{{ url_for('equipment.create') }}">
+    <div class="input-group">
+      <input type="text" class="form-control" name="q"
+             placeholder="Ketik minimal 3 huruf..." autocomplete="off">
+      <button class="btn btn-primary">Create</button>
+    </div>
+    <div class="form-text">Ketik ≥3 huruf (ID atau Nama), lalu pilih dari sugesti.</div>
+  </form>
+</div>
+
+{% endblock %}

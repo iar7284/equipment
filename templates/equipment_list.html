@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="mb-3">
+  <h4 class="mb-2">Equipment List</h4>
+
+  <!-- MOBILE -->
+  <div class="d-sm-none">
+    <div class="d-flex gap-2 align-items-stretch">
+      <form method="get" role="search" class="flex-grow-1">
+        <div class="input-group input-group-sm">
+          <input type="text" name="q" value="{{ q or '' }}" class="form-control"
+                 placeholder="Cari ID/Nama equipment..." autocomplete="off">
+          {% if q %}
+            <a class="btn btn-outline-secondary btn-sm"
+               href="{{ url_for('equipment.list') }}"
+               title="Clear" aria-label="Clear"><i class="bi bi-x"></i></a>
+          {% endif %}
+          <button class="btn btn-primary btn-sm" type="submit">Search</button>
+        </div>
+      </form>
+      <a href="{{ url_for('equipment.new') }}" class="btn btn-primary btn-sm">Add</a>
+    </div>
+  </div>
+
+  <!-- DESKTOP -->
+  <div class="d-none d-sm-flex align-items-stretch gap-2 flex-wrap">
+    <form method="get" role="search" class="d-flex flex-grow-1">
+      <div class="input-group">
+        <input type="text" name="q" value="{{ q or '' }}" class="form-control"
+               placeholder="Cari ID/Nama equipment..." autocomplete="off">
+        {% if q %}
+          <a class="btn btn-outline-secondary"
+             href="{{ url_for('equipment.list') }}"
+             title="Clear" aria-label="Clear"><i class="bi bi-x"></i></a>
+        {% endif %}
+        <button class="btn btn-primary" type="submit">Search</button>
+      </div>
+    </form>
+    <a href="{{ url_for('equipment.new') }}" class="btn btn-primary">Add New Equipment</a>
+  </div>
+</div>
+
+{% if q %}
+  <div class="small text-muted mb-2">Hasil untuk: <strong>{{ q }}</strong></div>
+{% endif %}
+
+<div class="list-group shadow-sm">
+  {% for eq in items %}
+    <a class="list-group-item list-group-item-action py-3"
+       href="{{ url_for('equipment.detail', equipment_id=eq.id) }}">
+      <div class="d-flex align-items-center">
+        {% if thumbs.get(eq.id) %}
+          <img src="{{ thumbs[eq.id] }}" width="64" height="48"
+               class="rounded me-3" alt="thumb" style="object-fit:cover;">
+        {% else %}
+          <div class="me-3" style="width:64px;height:48px;background:#f1f3f5;border-radius:.375rem;"></div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <div class="fw-semibold">{{ eq.name }}</div>
+          <div class="small text-muted">
+            Images: {{ eq.image_count() }}/4 &nbsp;|&nbsp;
+            Last Update: {{ eq.updated_at.strftime("%d/%m/%Y, %H:%M") }} &nbsp;|&nbsp;
+            By: {{ eq.created_by or 'admin' }}
+          </div>
+        </div>
+        <div class="ms-auto text-muted"><i class="bi bi-chevron-right"></i></div>
+      </div>
+    </a>
+  {% else %}
+    <div class="p-4 text-center text-muted">
+      Tidak ada data yang cocok.
+      {% if q %}Coba bersihkan filter.{% else %}Klik <strong>Add New Equipment</strong> untuk mulai.{% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation" class="mt-3">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('equipment.list', q=q, page=page-1) }}" tabindex="-1">Previous</a>
+    </li>
+    {% for p in pages %}
+      {% if p is none %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% else %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('equipment.list', q=q, page=p) }}">{{ p }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('equipment.list', q=q, page=page+1) }}">Next</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
